@@ -591,6 +591,20 @@
             </div>
           `).join('')}
         </div>
+
+        <div class="print-only-temps">
+          <h3>Quick Reference Temperatures</h3>
+          <ul class="print-temps-grid">
+            <li><span>Sous Vide Turkey</span><strong>${escapeHtml(state.cfg.turkeyTemp)}°F (2.5–4 hrs)</strong></li>
+            <li><span>Crispy Turkey Skin (Wed)</span><strong>400°F (25–35 min)</strong></li>
+            <li><span>Apple Crumble (Thu 1:30)</span><strong>350°F (50–55 min)</strong></li>
+            <li><span>Stuffing Stage 1 (Wed)</span><strong>350°F covered (20 min)</strong></li>
+            <li><span>Stuffing Final Crisp (Thu 3:30)</span><strong>425°F uncovered (20 min)</strong></li>
+            <li><span>Brussels Air Fryer (Thu 3:15)</span><strong>400°F (13m × 2 + 3m garlic)</strong></li>
+            <li><span>Skin Re-Crisp (Toaster Oven)</span><strong>350°F (2–3 min)</strong></li>
+            <li><span>Dinner Rolls (Main Oven OFF)</span><strong>Residual heat (4–5 min)</strong></li>
+          </ul>
+        </div>
       </article>
     `;
 
