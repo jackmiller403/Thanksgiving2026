@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>The Thanksgiving Chronicle — 2026 Kitchen Execution Plan</title>
-  <meta name="description" content="A classic broadsheet execution plan for Thanksgiving 2026 targeting a 4:00 PM dinner: sous vide turkey breast, challah stuffing, air-fryer Brussels sprouts, and apple crumble.">
+  <title>The Thanksgiving Chronicle — 2026 Kitchen Plan</title>
+  <meta name="description" content="A classic broadsheet execution plan for Thanksgiving 2026 targeting a 4:00 PM dinner: sous vide turkey breast, challah stuffing, air-fryer Brussels sprouts, apple crumble, and optional freezer squash soup.">
   <meta name="theme-color" content="#f5f0e6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,180 +15,165 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- ==================== NEWSPAPER MASTHEAD ==================== -->
+  <!-- ==================== MINIMAL NEWSPAPER MASTHEAD ==================== -->
   <header class="masthead page-shell" role="banner">
-    <div class="masthead-meta-top">
-      <span>Vol. MMXXVI · Kitchen Dispatch</span>
-      <span class="meta-center">“All the Timings That Are Fit to Cook”</span>
-      <span>Target Dinner: 4:00 P.M.</span>
+    <div class="masthead-kicker">
+      <span>Nov. 25–26, 2026</span>
+      <span>Target Dinner · 4:00 P.M.</span>
     </div>
-
-    <div class="masthead-title-wrap">
-      <h1 class="masthead-nameplate">The Thanksgiving Chronicle</h1>
-      <p class="masthead-deck">A Two-Day Culinary Execution Plan for Solo Lead Chef &amp; Optional Sous Chef</p>
-    </div>
-
-    <div class="masthead-dateline">
-      <span>Wed. Nov. 25 &amp; Thu. Nov. 26, 2026</span>
-      <span class="edition-accent">3-lb Half Turkey · 4 Courses · Zero Oven Conflicts</span>
-      <span class="dateline-progress-desktop" id="dateline-progress">0% Complete</span>
-    </div>
+    <h1 class="masthead-nameplate">The Thanksgiving Chronicle</h1>
+    <p class="masthead-sub">Two-Day Kitchen Plan · 3-lb Half Turkey, Challah Stuffing, Sprouts &amp; Apple Crumble</p>
   </header>
 
-  <!-- ==================== STICKY SECTION RIBBON ==================== -->
+  <!-- ==================== STICKY SECTION NAV ==================== -->
   <div class="section-nav-wrap">
     <nav class="section-nav" role="tablist" aria-label="Kitchen Sections">
-      <button class="nav-tab" id="tab-timeline" role="tab" aria-selected="true" aria-controls="panel-timeline" data-view="timeline">
-        <span>Run of Show</span>
-        <span class="nav-badge" id="badge-timeline">0/21</span>
-      </button>
-      <button class="nav-tab" id="tab-recipes" role="tab" aria-selected="false" aria-controls="panel-recipes" data-view="recipes">
-        <span>Recipes</span>
-        <span class="nav-badge">4+</span>
-      </button>
-      <button class="nav-tab" id="tab-appliances" role="tab" aria-selected="false" aria-controls="panel-appliances" data-view="appliances">
-        <span>Appliances</span>
-      </button>
-      <button class="nav-tab" id="tab-notes" role="tab" aria-selected="false" aria-controls="panel-notes" data-view="notes">
-        <span>Notes</span>
-      </button>
+      <button class="nav-tab" id="tab-timeline" role="tab" aria-selected="true" aria-controls="panel-timeline" data-view="timeline">Run of Show</button>
+      <button class="nav-tab" id="tab-recipes" role="tab" aria-selected="false" aria-controls="panel-recipes" data-view="recipes">Recipes</button>
+      <button class="nav-tab" id="tab-appliances" role="tab" aria-selected="false" aria-controls="panel-appliances" data-view="appliances">Appliances</button>
+      <button class="nav-tab" id="tab-notes" role="tab" aria-selected="false" aria-controls="panel-notes" data-view="notes">Notes</button>
 
       <div class="nav-spacer"></div>
-      <button class="wake-btn-desktop" id="btn-wake-desktop" type="button" aria-pressed="false" title="Prevent screen from sleeping while cooking">
-        <span id="wake-desktop-dot" aria-hidden="true">○</span>
-        <span>Keep Awake</span>
-      </button>
+      <div class="nav-status-desktop">
+        <span id="nav-progress-desktop">0/23 done</span>
+        <button class="text-link-btn" id="btn-wake-desktop" type="button" aria-pressed="false">Keep Awake: Off</button>
+      </div>
     </nav>
   </div>
 
-  <!-- ==================== MAIN BROADSHEET WORKSPACE ==================== -->
+  <!-- ==================== WORKSPACE ==================== -->
   <div class="page-shell">
-    <!-- Mobile Quick Progress & Controls Strip (<960px) -->
-    <section class="mobile-desk-bar" aria-label="Quick Kitchen Controls">
-      <div class="progress-row">
-        <span id="mobile-progress-label">0 of 21 Steps Completed</span>
-        <span id="mobile-next-time">Next: Wed 5:30 PM</span>
+    <!-- Mobile Compact Status & Collapsible Options (<960px) -->
+    <section class="mobile-bar" aria-label="Kitchen Status and Options">
+      <div class="mobile-bar-row">
+        <button class="text-link-btn accent" id="btn-jump-next-mobile" type="button">
+          <span id="mobile-next-label">0/23 · Next: Wed 5:30 PM ↓</span>
+        </button>
+        <button class="text-link-btn" id="btn-mobile-options" type="button" aria-expanded="false" aria-controls="mobile-options-drawer">
+          <span id="mobile-options-summary">Options ▾</span>
+        </button>
       </div>
-      <div class="progress-track" aria-hidden="true">
+      <div class="progress-hairline" aria-hidden="true">
         <div class="progress-fill" id="mobile-progress-fill"></div>
       </div>
-      <div class="control-pills-row">
-        <div class="segmented" role="group" aria-label="Kitchen Crew Mode">
-          <button class="segmented-btn" id="mobile-crew-solo" type="button" data-crew="solo" aria-pressed="true">Solo Chef</button>
-          <button class="segmented-btn" id="mobile-crew-partner" type="button" data-crew="partner" aria-pressed="false">+ Partner</button>
+
+      <div class="mobile-options-drawer" id="mobile-options-drawer" hidden>
+        <div class="option-row">
+          <span class="option-label">Crew</span>
+          <div class="choice-group" role="group" aria-label="Kitchen Crew">
+            <button class="choice-btn" type="button" data-crew="solo" aria-pressed="true">Solo</button>
+            <button class="choice-btn" type="button" data-crew="partner" aria-pressed="false">+ Partner</button>
+          </div>
         </div>
-        <button class="utility-btn" id="btn-wake-mobile" type="button" aria-pressed="false">
-          <span aria-hidden="true">☀</span> Keep Awake
-        </button>
-        <button class="utility-btn accent-btn" id="btn-jump-next-mobile" type="button">
-          Next Step ↓
-        </button>
+        <div class="option-row">
+          <span class="option-label">Squash Soup (Freezer)</span>
+          <div class="choice-group" role="group" aria-label="Optional Squash Soup">
+            <button class="choice-btn" type="button" data-soup="true" aria-pressed="true">Included</button>
+            <button class="choice-btn" type="button" data-soup="false" aria-pressed="false">Skip</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Screen Wake</span>
+          <div class="choice-group">
+            <button class="choice-btn" id="btn-wake-mobile" type="button" aria-pressed="false">Keep Awake: Off</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Turkey Temp</span>
+          <div class="choice-group">
+            <button class="choice-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="145" aria-pressed="true">145°F Juicy</button>
+            <button class="choice-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="150" aria-pressed="false">150°F Classic</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Turkey Cut</span>
+          <div class="choice-group">
+            <button class="choice-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="bone-in" aria-pressed="true">Bone-In</button>
+            <button class="choice-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="boneless" aria-pressed="false">Boneless</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Stuffing</span>
+          <div class="choice-group">
+            <button class="choice-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="two-thirds" aria-pressed="true">1-lb (2/3x)</button>
+            <button class="choice-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="full" aria-pressed="false">1.5-lb (Full)</button>
+          </div>
+        </div>
+        <div class="option-row">
+          <span class="option-label">Apple Crumble</span>
+          <div class="choice-group">
+            <button class="choice-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="three-quarters" aria-pressed="true">6 Apples</button>
+            <button class="choice-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="full" aria-pressed="false">8 Apples</button>
+          </div>
+        </div>
       </div>
     </section>
 
     <div class="broadsheet-grid">
-      <!-- ==================== PRIMARY EDITORIAL COLUMN ==================== -->
+      <!-- ==================== MAIN READING COLUMN ==================== -->
       <main class="main-column" id="main-content">
 
         <!-- VIEW 1: RUN OF SHOW -->
         <section class="view-panel active" id="panel-timeline" role="tabpanel" aria-labelledby="tab-timeline">
-          <!-- Front Page Lead Feature -->
-          <article class="lead-banner">
-            <div>
-              <p class="lead-kicker">Special Culinary Edition · Dinner at Four Sharp</p>
-              <h2 class="lead-headline">Precision Turkey, Calm Oven, Hot Table at 4:00 P.M.</h2>
-              <p class="lead-standfirst">
-                A 75-minute Wednesday evening head start clears Thanksgiving morning completely. The sous vide handles the 3-lb half turkey breast hands-free while dessert bakes early—leaving every appliance choreographed to land hot together at 4:00 PM.
-              </p>
-              <div class="lead-stats-strip">
-                <div class="stat-cell">
-                  <span class="stat-label">Wed Prep</span>
-                  <span class="stat-value">~75 min</span>
-                </div>
-                <div class="stat-cell">
-                  <span class="stat-label">Snacks Out</span>
-                  <span class="stat-value">2:00 PM</span>
-                </div>
-                <div class="stat-cell">
-                  <span class="stat-label">Dinner Bell</span>
-                  <span class="stat-value">4:00 PM</span>
-                </div>
-              </div>
-            </div>
-            <figure class="lead-figure">
-              <img
-                src="assets/harvest-engraving.jpg"
-                alt="Classic pen-and-ink newspaper engraving of Thanksgiving turkey, herbs, apples, Brussels sprouts, and gravy boat"
-                class="lead-engraving"
-                width="1200"
-                height="670"
-              >
-              <figcaption class="lead-caption">Fig. 1 — Sous Vide Half Breast, Challah Stuffing, Crispy Sprouts &amp; Spiced Apple Crumble.</figcaption>
-            </figure>
-          </article>
-
-          <!-- Timeline Filter Toolbar -->
-          <div class="view-toolbar" aria-label="Timeline Filters">
-            <div class="view-toolbar-group">
-              <div class="segmented" role="group" aria-label="Filter by Day">
-                <button class="segmented-btn" id="filter-day-all" type="button" data-day="all" aria-pressed="true">Both Days</button>
-                <button class="segmented-btn" id="filter-day-wed" type="button" data-day="wed" aria-pressed="false">Wed Prep</button>
-                <button class="segmented-btn" id="filter-day-thu" type="button" data-day="thu" aria-pressed="false">Thu Dinner</button>
-              </div>
+          <div class="filter-strip" aria-label="Timeline Filters">
+            <div class="filter-group" role="group" aria-label="Filter by Day">
+              <button class="choice-btn" id="filter-day-all" type="button" data-day="all" aria-pressed="true">All</button>
+              <button class="choice-btn" id="filter-day-wed" type="button" data-day="wed" aria-pressed="false">Wednesday</button>
+              <button class="choice-btn" id="filter-day-thu" type="button" data-day="thu" aria-pressed="false">Thursday</button>
             </div>
 
-            <div class="view-toolbar-group" id="partner-role-filter-wrap" hidden>
-              <div class="segmented" role="group" aria-label="Filter by Chef Role">
-                <button class="segmented-btn" id="filter-role-all" type="button" data-role="all" aria-pressed="true">All Tasks</button>
-                <button class="segmented-btn" id="filter-role-lead" type="button" data-role="lead" aria-pressed="false">Lead Chef</button>
-                <button class="segmented-btn" id="filter-role-partner" type="button" data-role="partner" aria-pressed="false">Partner</button>
-              </div>
+            <div class="filter-group" id="partner-role-filter-wrap" hidden role="group" aria-label="Filter by Chef Role">
+              <button class="choice-btn" type="button" data-role="all" aria-pressed="true">All Roles</button>
+              <button class="choice-btn" type="button" data-role="lead" aria-pressed="false">Lead</button>
+              <button class="choice-btn" type="button" data-role="partner" aria-pressed="false">Partner</button>
             </div>
 
-            <div class="view-toolbar-group">
-              <button class="utility-btn" id="btn-toggle-hide-done" type="button" aria-pressed="false">Hide Done</button>
-            </div>
+            <button class="text-link-btn" id="btn-toggle-hide-done" type="button" aria-pressed="false">Hide done</button>
           </div>
 
-          <!-- Dynamic Timeline Container -->
           <div id="timeline-container"></div>
         </section>
 
-        <!-- VIEW 2: FULL RECIPES & MODIFICATIONS -->
+        <!-- VIEW 2: RECIPES -->
         <section class="view-panel" id="panel-recipes" role="tabpanel" aria-labelledby="tab-recipes">
           <div class="recipe-index-strip" aria-label="Jump to Recipe">
-            <button class="recipe-jump-btn active" type="button" data-jump="recipe-turkey">1. Sous Vide Turkey</button>
-            <button class="recipe-jump-btn" type="button" data-jump="recipe-stuffing">2. Challah Stuffing</button>
-            <button class="recipe-jump-btn" type="button" data-jump="recipe-brussels">3. Air-Fryer Brussels</button>
-            <button class="recipe-jump-btn" type="button" data-jump="recipe-crumble">4. Apple Crumble</button>
-            <button class="recipe-jump-btn" type="button" data-jump="recipe-supporting">5. Mocktail &amp; Sides</button>
+            <button class="recipe-jump-btn active" type="button" data-jump="recipe-turkey">Turkey</button>
+            <button class="recipe-jump-btn" type="button" data-jump="recipe-stuffing">Stuffing</button>
+            <button class="recipe-jump-btn" type="button" data-jump="recipe-brussels">Brussels</button>
+            <button class="recipe-jump-btn" type="button" data-jump="recipe-crumble">Crumble</button>
+            <button class="recipe-jump-btn" type="button" data-jump="recipe-supporting">Sides</button>
           </div>
           <div id="recipes-container"></div>
         </section>
 
-        <!-- VIEW 3: APPLIANCE SCHEDULE -->
+        <!-- VIEW 3: APPLIANCES -->
         <section class="view-panel" id="panel-appliances" role="tabpanel" aria-labelledby="tab-appliances">
           <div class="day-banner">
-            <h2 class="day-banner-title">Appliance Choreography Matrix</h2>
-            <span class="day-banner-sub">7 Appliances · Zero Collisions</span>
+            <h2 class="day-banner-title">Appliance Schedule</h2>
+            <span class="day-banner-sub">Zero Oven Conflicts</span>
           </div>
           <p class="appliance-intro">
-            Every heat source in your kitchen is assigned a clear lane from Wednesday evening through dessert. The main oven never faces two competing temperatures at once, and your toaster oven and residual oven heat handle the 3:50 PM sprint.
+            Every appliance has a dedicated lane from Wednesday evening through dessert. The main oven never faces competing temperatures, and your toaster oven and residual heat handle the 3:50 PM finish.
           </p>
           <div class="appliance-grid" id="appliances-container"></div>
         </section>
 
-        <!-- VIEW 4: CHEF'S MODIFICATIONS & PANTRY AUDIT -->
+        <!-- VIEW 4: EDITORIAL NOTES & PANTRY -->
         <section class="view-panel" id="panel-notes" role="tabpanel" aria-labelledby="tab-notes">
+          <figure class="notes-vignette">
+            <img src="assets/harvest-engraving.jpg" alt="Pen-and-ink newspaper engraving of Thanksgiving harvest platter, apples, Brussels sprouts, and gravy boat" width="1200" height="670">
+            <figcaption>Calibrated for a 3-lb half turkey breast, 6 apples, 1-lb sprouts &amp; optional freezer squash soup.</figcaption>
+          </figure>
+
           <div class="day-banner">
-            <h2 class="day-banner-title">Editorial Notes: Portions &amp; Simplifications</h2>
-            <span class="day-banner-sub">Tailored to Your Exact Ingredients</span>
+            <h2 class="day-banner-title">Chef’s Notes &amp; Modifications</h2>
+            <span class="day-banner-sub">Portions, Appliances &amp; Simplicity</span>
           </div>
           <div class="editorial-columns" id="notes-container"></div>
 
-          <section class="pantry-section" aria-label="Pantry and Equipment Audit">
+          <section class="pantry-section" aria-label="Pantry Audit">
             <div class="day-banner">
-              <h2 class="day-banner-title">Mise en Place &amp; Pantry Audit</h2>
+              <h2 class="day-banner-title">Pantry &amp; Prep Audit</h2>
               <span class="day-banner-sub" id="pantry-progress-label">0 Checked</span>
             </div>
             <div class="pantry-grid" id="pantry-container"></div>
@@ -197,95 +182,94 @@
 
       </main>
 
-      <!-- ==================== STICKY KITCHEN DESK SIDEBAR (iPad / Desktop) ==================== -->
-      <aside class="kitchen-desk" aria-label="Kitchen Control Desk">
-        <!-- Progress Module -->
-        <div class="desk-module">
+      <!-- ==================== SERENE IPAD / DESKTOP SIDEBAR ==================== -->
+      <aside class="kitchen-desk" aria-label="Kitchen Desk">
+        <figure class="desk-engraving-wrap">
+          <img src="assets/harvest-engraving.jpg" alt="Pen-and-ink engraving of Thanksgiving harvest" class="desk-engraving" width="1200" height="670">
+          <figcaption class="desk-caption">Snacks at 2:00 · Dinner at 4:00 sharp</figcaption>
+        </figure>
+
+        <div class="desk-section">
           <h3 class="desk-heading">
-            <span>Execution Desk</span>
+            <span>Progress</span>
             <span id="desk-progress-pct">0%</span>
           </h3>
-          <div class="progress-track" aria-hidden="true">
+          <div class="progress-hairline" aria-hidden="true">
             <div class="progress-fill" id="desk-progress-fill"></div>
           </div>
-          <p style="margin:8px 0 10px; font-family:var(--font-mono); font-size:0.72rem; color:var(--ink-muted);" id="desk-next-step">
-            Next up: Wed 5:30 PM
-          </p>
-          <button class="utility-btn accent-btn" id="btn-jump-next-desk" type="button" style="width:100%; justify-content:center;">
-            Jump to Next Step ↓
-          </button>
-        </div>
-
-        <!-- Crew Mode Module -->
-        <div class="desk-module">
-          <h3 class="desk-heading">Kitchen Crew</h3>
-          <div class="segmented" style="width:100%;" role="group" aria-label="Desktop Crew Mode">
-            <button class="segmented-btn" id="desk-crew-solo" type="button" data-crew="solo" aria-pressed="true" style="flex:1;">Solo Chef</button>
-            <button class="segmented-btn" id="desk-crew-partner" type="button" data-crew="partner" aria-pressed="false" style="flex:1;">+ Partner</button>
+          <div style="margin-top:8px;">
+            <button class="text-link-btn accent" id="btn-jump-next-desk" type="button">
+              <span id="desk-next-step">Next: Wed 5:30 PM ↓</span>
+            </button>
           </div>
-          <p style="margin:8px 0 0; font-size:0.86rem; color:var(--ink-muted); line-height:1.45;" id="desk-crew-hint">
-            All tasks sequenced for one calm lead chef. Switch to “+ Partner” anytime a helper joins.
-          </p>
         </div>
 
-        <!-- Live Recipe Calibration Module -->
-        <div class="desk-module">
-          <h3 class="desk-heading">Portion &amp; Temp Calibration</h3>
-          <div class="desk-config-group">
-            <div class="config-row">
-              <span class="config-label">Sous Vide Turkey Temp</span>
-              <div class="segmented">
-                <button class="segmented-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="145" aria-pressed="true">145°F Juicy</button>
-                <button class="segmented-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="150" aria-pressed="false">150°F Classic</button>
+        <div class="desk-section">
+          <h3 class="desk-heading">Kitchen Setup</h3>
+          <div class="desk-stack">
+            <div class="option-row">
+              <span class="option-label">Crew</span>
+              <div class="choice-group" role="group" aria-label="Desktop Crew Mode">
+                <button class="choice-btn" id="desk-crew-solo" type="button" data-crew="solo" aria-pressed="true">Solo</button>
+                <button class="choice-btn" id="desk-crew-partner" type="button" data-crew="partner" aria-pressed="false">+ Partner</button>
               </div>
             </div>
-            <div class="config-row">
-              <span class="config-label">Turkey Breast Cut</span>
-              <div class="segmented">
-                <button class="segmented-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="bone-in" aria-pressed="true">Bone-In</button>
-                <button class="segmented-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="boneless" aria-pressed="false">Boneless</button>
-              </div>
-            </div>
-            <div class="config-row">
-              <span class="config-label">Challah Stuffing Batch</span>
-              <div class="segmented">
-                <button class="segmented-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="two-thirds" aria-pressed="true">1-lb Loaf (2/3x)</button>
-                <button class="segmented-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="full" aria-pressed="false">1.5-lb (Full)</button>
-              </div>
-            </div>
-            <div class="config-row">
-              <span class="config-label">Apple Crumble Batch</span>
-              <div class="segmented">
-                <button class="segmented-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="three-quarters" aria-pressed="true">6 Apples (3/4x)</button>
-                <button class="segmented-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="full" aria-pressed="false">8 Apples (Full)</button>
+            <div class="option-row">
+              <span class="option-label">Squash Soup</span>
+              <div class="choice-group" role="group" aria-label="Desktop Squash Soup">
+                <button class="choice-btn" id="desk-soup-on" type="button" data-soup="true" aria-pressed="true">Included</button>
+                <button class="choice-btn" id="desk-soup-off" type="button" data-soup="false" aria-pressed="false">Skip</button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Kitchen Timers -->
-        <div class="desk-module">
-          <h3 class="desk-heading">Quick Timers</h3>
-          <div class="desk-quick-timers">
-            <button class="utility-btn" type="button" data-quick-timer="3" data-quick-label="Quick 3-Min">+3m</button>
-            <button class="utility-btn" type="button" data-quick-timer="5" data-quick-label="Quick 5-Min">+5m</button>
-            <button class="utility-btn" type="button" data-quick-timer="10" data-quick-label="Quick 10-Min">+10m</button>
-            <button class="utility-btn" type="button" data-quick-timer="15" data-quick-label="Quick 15-Min">+15m</button>
-            <button class="utility-btn" type="button" data-quick-timer="20" data-quick-label="Quick 20-Min">+20m</button>
-          </div>
+        <div class="desk-section">
+          <details class="desk-details">
+            <summary>Portions &amp; Temps</summary>
+            <div class="desk-details-body">
+              <div class="option-row">
+                <span class="option-label">Turkey</span>
+                <div class="choice-group">
+                  <button class="choice-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="145" aria-pressed="true">145°F</button>
+                  <button class="choice-btn" type="button" data-cfg-key="turkeyTemp" data-cfg-val="150" aria-pressed="false">150°F</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Cut</span>
+                <div class="choice-group">
+                  <button class="choice-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="bone-in" aria-pressed="true">Bone-In</button>
+                  <button class="choice-btn" type="button" data-cfg-key="turkeyBone" data-cfg-val="boneless" aria-pressed="false">Boneless</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Stuffing</span>
+                <div class="choice-group">
+                  <button class="choice-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="two-thirds" aria-pressed="true">1-lb</button>
+                  <button class="choice-btn" type="button" data-cfg-key="stuffingScale" data-cfg-val="full" aria-pressed="false">1.5-lb</button>
+                </div>
+              </div>
+              <div class="option-row">
+                <span class="option-label">Crumble</span>
+                <div class="choice-group">
+                  <button class="choice-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="three-quarters" aria-pressed="true">6 Apples</button>
+                  <button class="choice-btn" type="button" data-cfg-key="crumbleScale" data-cfg-val="full" aria-pressed="false">8 Apples</button>
+                </div>
+              </div>
+            </div>
+          </details>
         </div>
 
-        <!-- Quick Temp Reference -->
-        <div class="desk-module">
-          <h3 class="desk-heading">Reference Temperatures</h3>
-          <ul class="desk-temp-list">
-            <li><span>Sous Vide Turkey</span><span class="desk-temp-val" id="ref-turkey-temp">145°F</span></li>
-            <li><span>Crispy Skin (Wed)</span><span class="desk-temp-val">400°F</span></li>
-            <li><span>Apple Crumble</span><span class="desk-temp-val">350°F</span></li>
-            <li><span>Stuffing Stage 1</span><span class="desk-temp-val">350°F</span></li>
-            <li><span>Stuffing Final Crisp</span><span class="desk-temp-val">425°F</span></li>
-            <li><span>Brussels Air Fryer</span><span class="desk-temp-val">400°F</span></li>
-            <li><span>Skin Re-Crisp (Toaster)</span><span class="desk-temp-val">350°F</span></li>
+        <div class="desk-section">
+          <h3 class="desk-heading">Temperatures</h3>
+          <ul class="temp-ledger">
+            <li><span>Sous Vide Turkey</span><span class="temp-val" id="ref-turkey-temp">145°F</span></li>
+            <li><span>Crispy Skin (Wed)</span><span class="temp-val">400°F</span></li>
+            <li><span>Apple Crumble</span><span class="temp-val">350°F</span></li>
+            <li><span>Stuffing Stage 1</span><span class="temp-val">350°F</span></li>
+            <li><span>Stuffing Crisp</span><span class="temp-val">425°F</span></li>
+            <li><span>Brussels Air Fryer</span><span class="temp-val">400°F</span></li>
+            <li><span>Skin Re-Crisp</span><span class="temp-val">350°F</span></li>
           </ul>
         </div>
       </aside>
@@ -293,23 +277,19 @@
 
     <!-- ==================== COLOPHON ==================== -->
     <footer class="colophon" role="contentinfo">
-      <div>
-        <strong>THE THANKSGIVING CHRONICLE · 2026 EDITION</strong><br>
-        Progress, timers &amp; scaling preferences save automatically on this device.
-      </div>
+      <span>The Thanksgiving Chronicle · Saved automatically on this device</span>
       <div class="colophon-actions">
-        <button class="utility-btn" id="btn-print" type="button">Print Edition</button>
-        <button class="utility-btn" id="btn-reset-progress" type="button">Reset Checklists</button>
+        <button class="text-link-btn" id="btn-print" type="button">Print</button>
+        <button class="text-link-btn" id="btn-reset-progress" type="button">Reset</button>
       </div>
     </footer>
   </div>
 
-  <!-- ==================== STICKY BOTTOM ACTIVE TIMER WIRE ==================== -->
+  <!-- ==================== STICKY BOTTOM TIMER WIRE ==================== -->
   <div class="timer-wire" id="timer-wire" role="region" aria-label="Active Kitchen Timers" aria-live="polite">
     <div class="timer-wire-inner" id="timer-wire-inner"></div>
   </div>
 
-  <!-- Feedback Toast -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="data.js"></script>

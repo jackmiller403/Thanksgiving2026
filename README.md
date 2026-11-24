@@ -7,7 +7,7 @@ A classic newspaper-inspired, iPhone-first (and iPad-responsive) web app for exe
 - **Challah Stuffing With Leeks & Celery** *(Smitten Kitchen / Deb Perelman)* — zero-waste **1-lb store-bought challah loaf (2/3 batch)** default with full 1.5-lb toggle and Wednesday Stage-1 foil-on make-ahead method.
 - **Air-Fryer Brussels Sprouts With Garlic, Balsamic & Soy** *(NYT Cooking / Melissa Clark)* — tailored for **1 lb trimmed sprouts** in a **small circular air fryer** using a two-batch + joint garlic finish.
 - **Mixed-Apple Oat & Pecan Crumble** *(NYT Cooking / Samantha Seneviratne)* — calibrated to **6 apples** (2 Granny Smith, 2 Golden Delicious, 2 Pink Lady) with dialed-back apple sugar to pair cleanly with **homemade caramel & vanilla ice cream**.
-- **Supporting Cast**: Meat/cheese/crackers board (2:00 PM), self-serve Cranberry-Ginger Lime mocktail bar, chilled whole-berry cranberry sauce, and residual-oven warm dinner rolls.
+- **Supporting Cast**: Optional freezer squash soup (thawed Wed, warmed hands-free in the Slow Cooker at 2:30 PM, served in small ½-cup starter mugs at 3:45 PM), meat/cheese/crackers board (2:00 PM), self-serve Cranberry-Ginger Lime mocktail bar, chilled whole-berry cranberry sauce, and residual-oven warm dinner rolls.
 
 ## Features
 - **Wednesday + Thursday Run of Show**: Persistent `localStorage` checklists, progress bar, and one-tap **Next Step** jump.

@@ -1,12 +1,12 @@
 /* ==========================================================================
-   THE THANKSGIVING CHRONICLE — Interactive Execution Engine
-   Persistent checklists · Multi-timer with wall-clock sync · Wake Lock · Scaling
+   THE THANKSGIVING CHRONICLE — Clean Interactive Execution Engine
+   Persistent checklists · Optional squash soup · Wall-clock timers · Wake Lock
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'thanksgiving_chronicle_2026_v1';
+  const STORAGE_KEY = 'thanksgiving_chronicle_2026_v2';
   const DATA = window.THANKSGIVING_DATA;
 
   const DEFAULT_STATE = {
@@ -16,6 +16,7 @@
     hideDone: false,
     cfg: {
       crewMode: 'solo',
+      includeSoup: true,
       turkeyTemp: '145',
       turkeyBone: 'bone-in',
       stuffingScale: 'two-thirds',
@@ -59,9 +60,7 @@
   function saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* Ignore storage quota issues in private browsing */
-    }
+    } catch { /* ignore */ }
   }
 
   /* ==================== HELPERS ==================== */
@@ -79,7 +78,7 @@
     el.textContent = msg;
     el.classList.add('show');
     clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => el.classList.remove('show'), 2200);
+    toastTimeout = setTimeout(() => el.classList.remove('show'), 2100);
   }
 
   function formatDuration(sec) {
@@ -112,15 +111,13 @@
         osc.start(now + idx * 0.14);
         osc.stop(now + idx * 0.14 + 0.7);
       });
-    } catch {
-      /* Audio playback optional */
-    }
+    } catch { /* ignore */ }
   }
 
-  /* ==================== WAKE LOCK (iPhone / iPad Cook Mode) ==================== */
+  /* ==================== WAKE LOCK ==================== */
   async function toggleWakeLock() {
     if (!('wakeLock' in navigator)) {
-      showToast('Keep Awake unsupported in this browser');
+      showToast('Keep Awake unsupported here');
       return;
     }
 
@@ -139,7 +136,7 @@
       wakeLock = await navigator.wakeLock.request('screen');
       wakeWanted = true;
       updateWakeUI(true);
-      showToast('Keep Awake On — Screen will stay lit');
+      showToast('Keep Awake On');
       wakeLock.addEventListener('release', () => {
         if (!wakeWanted) updateWakeUI(false);
       });
@@ -150,18 +147,14 @@
   }
 
   function updateWakeUI(active) {
-    const mobileBtn = document.getElementById('btn-wake-mobile');
-    const deskBtn = document.getElementById('btn-wake-desktop');
-    const dot = document.getElementById('wake-desktop-dot');
-    if (mobileBtn) {
-      mobileBtn.classList.toggle('active', active);
-      mobileBtn.setAttribute('aria-pressed', String(active));
-    }
-    if (deskBtn) {
-      deskBtn.classList.toggle('active', active);
-      deskBtn.setAttribute('aria-pressed', String(active));
-    }
-    if (dot) dot.textContent = active ? '●' : '○';
+    const label = active ? 'Keep Awake: On' : 'Keep Awake: Off';
+    ['btn-wake-mobile', 'btn-wake-desktop'].forEach((id) => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.textContent = label;
+      btn.setAttribute('aria-pressed', String(active));
+      btn.classList.toggle('active', active);
+    });
   }
 
   document.addEventListener('visibilitychange', async () => {
@@ -175,7 +168,6 @@
 
   /* ==================== MULTI-TIMER ENGINE ==================== */
   function startTimer(label, minutes) {
-    // Prime audio context on user gesture (critical for iOS Safari)
     try {
       const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
       if (AudioContextCtor) {
@@ -189,21 +181,15 @@
     timers.push({
       id,
       label,
-      totalSec: durationSec,
       remainingSec: durationSec,
       endTime: Date.now() + durationSec * 1000,
       paused: false,
       ringing: false
     });
 
-    ensureTimerLoop();
+    if (!timerInterval) timerInterval = setInterval(tickTimers, 500);
     renderTimers();
-    showToast(`Timer started: ${label} (${minutes}m)`);
-  }
-
-  function ensureTimerLoop() {
-    if (timerInterval) return;
-    timerInterval = setInterval(tickTimers, 500);
+    showToast(`Timer: ${label} (${minutes}m)`);
   }
 
   function tickTimers() {
@@ -224,7 +210,7 @@
         t.ringing = true;
         changed = true;
         playChime();
-        showToast(`DONE: ${t.label}!`);
+        showToast(`Done: ${t.label}`);
       } else {
         const rounded = Math.ceil(secLeft);
         if (rounded !== t.remainingSec) {
@@ -269,24 +255,19 @@
 
     wire.classList.add('visible');
     document.body.classList.add('has-timers');
-    inner.innerHTML = `
-      <span class="timer-wire-label">Active Wire ·</span>
-      ${timers.map((t) => `
-        <div class="timer-pill ${t.ringing ? 'ringing' : ''}">
-          <span class="timer-pill-name" title="${escapeHtml(t.label)}">${escapeHtml(t.label)}</span>
-          <span class="timer-pill-clock">${t.ringing ? 'DONE' : formatDuration(t.remainingSec)}</span>
-          ${!t.ringing ? `
-            <button class="timer-ctrl-btn" type="button" data-timer-pause="${t.id}" aria-label="${t.paused ? 'Resume' : 'Pause'} ${escapeHtml(t.label)}">
-              ${t.paused ? '▶' : '❚❚'}
-            </button>
-          ` : ''}
-          <button class="timer-ctrl-btn" type="button" data-timer-dismiss="${t.id}" aria-label="Dismiss ${escapeHtml(t.label)}">✕</button>
-        </div>
-      `).join('')}
-    `;
+    inner.innerHTML = timers.map((t) => `
+      <div class="timer-pill ${t.ringing ? 'ringing' : ''}">
+        <span class="timer-pill-name" title="${escapeHtml(t.label)}">${escapeHtml(t.label)}</span>
+        <span class="timer-pill-clock">${t.ringing ? 'DONE' : formatDuration(t.remainingSec)}</span>
+        ${!t.ringing ? `
+          <button class="timer-ctrl-btn" type="button" data-timer-pause="${t.id}" aria-label="${t.paused ? 'Resume' : 'Pause'}">${t.paused ? '▶' : '❚❚'}</button>
+        ` : ''}
+        <button class="timer-ctrl-btn" type="button" data-timer-dismiss="${t.id}" aria-label="Dismiss">✕</button>
+      </div>
+    `).join('');
   }
 
-  /* ==================== PROGRESS & SYNCED UI ==================== */
+  /* ==================== PROGRESS & CONTROLS SYNC ==================== */
   function updateProgress() {
     const allSteps = DATA.getTimeline(state.cfg);
     const total = allSteps.length;
@@ -294,20 +275,14 @@
     const pct = total ? Math.round((completed / total) * 100) : 0;
     const nextStep = allSteps.find((s) => !state.doneSteps[s.id]);
 
-    const badge = document.getElementById('badge-timeline');
-    if (badge) badge.textContent = `${completed}/${total}`;
+    const navDesk = document.getElementById('nav-progress-desktop');
+    if (navDesk) navDesk.textContent = `${completed}/${total} done`;
 
-    const datelineProg = document.getElementById('dateline-progress');
-    if (datelineProg) datelineProg.textContent = `${pct}% Complete`;
-
-    const mobileLabel = document.getElementById('mobile-progress-label');
-    if (mobileLabel) mobileLabel.textContent = `${completed} of ${total} Steps Completed`;
-
-    const mobileNext = document.getElementById('mobile-next-time');
+    const mobileNext = document.getElementById('mobile-next-label');
     if (mobileNext) {
       mobileNext.textContent = nextStep
-        ? `Next: ${nextStep.day === 'wed' ? 'Wed' : 'Thu'} ${nextStep.time}`
-        : 'Dinner Ready!';
+        ? `${completed}/${total} · Next: ${nextStep.day === 'wed' ? 'Wed' : 'Thu'} ${nextStep.time} ↓`
+        : `${completed}/${total} · Dinner Ready`;
     }
 
     const deskPct = document.getElementById('desk-progress-pct');
@@ -316,8 +291,8 @@
     const deskNext = document.getElementById('desk-next-step');
     if (deskNext) {
       deskNext.textContent = nextStep
-        ? `Next: ${nextStep.day === 'wed' ? 'Wed' : 'Thu'} ${nextStep.time} — ${nextStep.title}`
-        : 'All steps complete — Enjoy Thanksgiving!';
+        ? `Next: ${nextStep.day === 'wed' ? 'Wed' : 'Thu'} ${nextStep.time} ↓`
+        : 'All steps complete';
     }
 
     ['mobile-progress-fill', 'desk-progress-fill'].forEach((id) => {
@@ -333,9 +308,12 @@
   }
 
   function syncControlButtons() {
-    // Crew buttons
     document.querySelectorAll('[data-crew]').forEach((btn) => {
       btn.setAttribute('aria-pressed', String(btn.dataset.crew === state.cfg.crewMode));
+    });
+
+    document.querySelectorAll('[data-soup]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String((btn.dataset.soup === 'true') === Boolean(state.cfg.includeSoup)));
     });
 
     const partnerFilterWrap = document.getElementById('partner-role-filter-wrap');
@@ -343,36 +321,36 @@
       partnerFilterWrap.hidden = state.cfg.crewMode !== 'partner';
     }
 
-    const crewHint = document.getElementById('desk-crew-hint');
-    if (crewHint) {
-      crewHint.textContent = state.cfg.crewMode === 'partner'
-        ? 'Partner-friendly steps are highlighted with an ochre PARTNER stamp. Filter by role above.'
-        : 'All tasks sequenced for one calm lead chef. Switch to “+ Partner” anytime a helper joins.';
-    }
-
-    // Day filters
     document.querySelectorAll('[data-day]').forEach((btn) => {
       btn.setAttribute('aria-pressed', String(btn.dataset.day === state.dayFilter));
     });
 
-    // Role filters
     document.querySelectorAll('[data-role]').forEach((btn) => {
       btn.setAttribute('aria-pressed', String(btn.dataset.role === state.roleFilter));
     });
 
-    // Hide done
     const hideBtn = document.getElementById('btn-toggle-hide-done');
     if (hideBtn) {
       hideBtn.setAttribute('aria-pressed', String(state.hideDone));
       hideBtn.classList.toggle('active', state.hideDone);
     }
 
-    // Config buttons (Sidebar + Recipes)
     document.querySelectorAll('[data-cfg-key]').forEach((btn) => {
       const key = btn.dataset.cfgKey;
       const val = btn.dataset.cfgVal;
       btn.setAttribute('aria-pressed', String(state.cfg[key] === val));
     });
+
+    const optSummary = document.getElementById('mobile-options-summary');
+    const drawer = document.getElementById('mobile-options-drawer');
+    if (optSummary && drawer) {
+      const open = !drawer.hidden;
+      const parts = [
+        state.cfg.crewMode === 'partner' ? '+Partner' : 'Solo',
+        state.cfg.includeSoup ? 'Soup' : 'No Soup'
+      ];
+      optSummary.textContent = `${parts.join(' · ')} ${open ? '▴' : '▾'}`;
+    }
   }
 
   /* ==================== RENDER TIMELINE ==================== */
@@ -393,7 +371,7 @@
     if (filtered.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          No steps match the current filter. Clear “Hide Done” or switch day/role filters to view all steps.
+          No steps match the current filter. Clear “Hide done” or select “All” to view every step.
         </div>
       `;
       updateProgress();
@@ -401,16 +379,8 @@
     }
 
     const days = [
-      {
-        key: 'wed',
-        title: 'Wednesday Evening · Nov. 25',
-        sub: '75-Min Smart Head Start · Zero Quality Loss'
-      },
-      {
-        key: 'thu',
-        title: 'Thursday · Thanksgiving Day · Nov. 26',
-        sub: 'Target Dinner Service: 4:00 P.M. Sharp'
-      }
+      { key: 'wed', title: 'Wednesday Evening · Nov. 25', sub: '75-Min Head Start' },
+      { key: 'thu', title: 'Thursday · Thanksgiving Day', sub: 'Dinner at 4:00 P.M.' }
     ];
 
     let html = '';
@@ -428,18 +398,26 @@
 
       let currentAct = '';
       daySteps.forEach((step) => {
-        if (step.act !== currentAct) {
+        if (dayInfo.key === 'thu' && step.act !== currentAct) {
           currentAct = step.act;
-          if (dayInfo.key === 'thu') {
-            html += `<div class="act-divider">${escapeHtml(currentAct)}</div>`;
-          }
+          html += `<div class="act-divider">${escapeHtml(currentAct)}</div>`;
         }
 
         const isDone = Boolean(state.doneSteps[step.id]);
         const highlightPartner = isPartnerMode && step.role === 'partner';
 
+        const metaParts = [];
+        metaParts.push(`<span class="step-meta-time-mobile">${escapeHtml(step.time)} · </span>`);
+        metaParts.push(escapeHtml(step.appliance));
+        if (step.optional) metaParts.push(' · <span class="meta-optional">Optional Soup</span>');
+        if (isPartnerMode) {
+          metaParts.push(step.role === 'partner'
+            ? ' · <span class="meta-partner">Partner</span>'
+            : ' · Lead');
+        }
+
         html += `
-          <article class="step-item ${isDone ? 'is-done' : ''} ${highlightPartner ? 'is-partner-highlight' : ''}" id="step-${step.id}" data-step-id="${step.id}">
+          <article class="step-item ${isDone ? 'is-done' : ''} ${highlightPartner ? 'is-partner-highlight' : ''}" id="step-${step.id}">
             <button
               class="step-check-btn"
               type="button"
@@ -459,45 +437,26 @@
             </div>
 
             <div class="step-body">
-              <div class="step-meta-row">
-                <span class="step-time-inline">${escapeHtml(step.time)} · ${escapeHtml(step.duration)}</span>
-                <span class="tag">${escapeHtml(step.appliance)}</span>
-                ${step.critical ? '<span class="tag tag-critical">Key Milestone</span>' : ''}
-                ${isPartnerMode
-                  ? (step.role === 'partner'
-                    ? '<span class="tag tag-partner">Partner Task</span>'
-                    : '<span class="tag tag-lead">Lead Chef</span>')
-                  : ''}
-              </div>
-
+              <div class="step-meta-line">${metaParts.join('')}</div>
               <h3 class="step-title">${escapeHtml(step.title)}</h3>
               <p class="step-desc">${escapeHtml(step.summary)}</p>
+              ${step.tip ? `<p class="step-note">Note: ${escapeHtml(step.tip)}</p>` : ''}
 
-              ${step.tip ? `
-                <p class="step-tip"><strong>Chef Note:</strong> ${escapeHtml(step.tip)}</p>
+              ${(step.timer || step.dishId) ? `
+                <div class="step-actions">
+                  ${step.timer ? `
+                    <button
+                      class="inline-action timer-action"
+                      type="button"
+                      data-start-timer="${step.timer.minutes}"
+                      data-timer-label="${escapeHtml(step.timer.label)}"
+                    >⏱ ${step.timer.minutes >= 60 ? `${(step.timer.minutes / 60).toFixed(1).replace('.0', '')}h` : `${step.timer.minutes}m`} timer</button>
+                  ` : ''}
+                  ${step.dishId ? `
+                    <button class="inline-action" type="button" data-open-recipe="${step.dishId}">Recipe →</button>
+                  ` : ''}
+                </div>
               ` : ''}
-
-              <div class="step-actions">
-                ${step.timer ? `
-                  <button
-                    class="action-chip timer-chip"
-                    type="button"
-                    data-start-timer="${step.timer.minutes}"
-                    data-timer-label="${escapeHtml(step.timer.label)}"
-                  >
-                    ⏱ Start ${step.timer.minutes >= 60 ? `${(step.timer.minutes / 60).toFixed(1).replace('.0', '')}h` : `${step.timer.minutes}m`} Timer
-                  </button>
-                ` : ''}
-                ${step.dishId ? `
-                  <button
-                    class="action-chip recipe-link-chip"
-                    type="button"
-                    data-open-recipe="${step.dishId}"
-                  >
-                    Full Recipe →
-                  </button>
-                ` : ''}
-              </div>
             </div>
           </article>
         `;
@@ -514,15 +473,14 @@
     if (!container) return;
 
     const recipes = DATA.getRecipes(state.cfg);
+    const supporting = DATA.getSupportingCast(state.cfg);
 
     let html = recipes.map((r) => `
       <article class="recipe-article" id="recipe-${r.id}">
         <header class="recipe-header">
           <div class="recipe-kicker-row">
             <span class="recipe-kicker">${escapeHtml(r.kicker)}</span>
-            <a class="recipe-source-link" href="${escapeHtml(r.sourceUrl)}" target="_blank" rel="noopener noreferrer">
-              Original: ${escapeHtml(r.sourceName)} ↗
-            </a>
+            <a href="${escapeHtml(r.sourceUrl)}" target="_blank" rel="noopener noreferrer">Source: ${escapeHtml(r.sourceName)} ↗</a>
           </div>
           <h2 class="recipe-title">${escapeHtml(r.title)}</h2>
           <p class="recipe-byline">${escapeHtml(r.byline)}</p>
@@ -535,11 +493,11 @@
           <div class="recipe-controls">
             ${r.controls.map((ctrl) => `
               <div class="recipe-control-item">
-                <span class="config-label">${escapeHtml(ctrl.label)}:</span>
-                <div class="segmented" role="group" aria-label="${escapeHtml(ctrl.label)}">
+                <span class="option-label">${escapeHtml(ctrl.label)}:</span>
+                <div class="choice-group" role="group" aria-label="${escapeHtml(ctrl.label)}">
                   ${ctrl.options.map((opt) => `
                     <button
-                      class="segmented-btn"
+                      class="choice-btn"
                       type="button"
                       data-cfg-key="${ctrl.key}"
                       data-cfg-val="${opt.value}"
@@ -552,8 +510,8 @@
           </div>
         ` : ''}
 
-        <div class="mod-box">
-          <h3 class="mod-box-title">Suggested Modifications for Your Portions &amp; Appliances</h3>
+        <div class="mod-note">
+          <h3 class="mod-note-title">Modifications for Your Portions &amp; Appliances</h3>
           <ul class="mod-list">
             ${r.modifications.map((m) => `<li>${m}</li>`).join('')}
           </ul>
@@ -561,7 +519,7 @@
 
         <div class="recipe-body-grid">
           <div class="recipe-ingredients-col">
-            <h3 class="recipe-subhead">Ingredients (Tap to Check)</h3>
+            <h3 class="recipe-subhead">Ingredients</h3>
             ${r.ingredientGroups.map((grp, gIdx) => `
               <div class="ingredient-group-title">${escapeHtml(grp.title)}</div>
               <ul class="ingredient-list">
@@ -580,7 +538,7 @@
           </div>
 
           <div class="recipe-method-col">
-            <h3 class="recipe-subhead">Method &amp; Execution</h3>
+            <h3 class="recipe-subhead">Method</h3>
             <ol class="method-list">
               ${r.steps.map((st) => `
                 <li class="method-step">
@@ -589,13 +547,11 @@
                   ${st.timer ? `
                     <div class="step-actions">
                       <button
-                        class="action-chip timer-chip"
+                        class="inline-action timer-action"
                         type="button"
                         data-start-timer="${st.timer.minutes}"
                         data-timer-label="${escapeHtml(st.timer.label)}"
-                      >
-                        ⏱ Start ${st.timer.minutes >= 60 ? `${(st.timer.minutes / 60).toFixed(1).replace('.0', '')}h` : `${st.timer.minutes}m`} Timer
-                      </button>
+                      >⏱ ${st.timer.minutes >= 60 ? `${(st.timer.minutes / 60).toFixed(1).replace('.0', '')}h` : `${st.timer.minutes}m`} timer</button>
                     </div>
                   ` : ''}
                 </li>
@@ -606,20 +562,30 @@
       </article>
     `).join('');
 
-    // Supporting Cast Section
     html += `
       <article class="recipe-article" id="recipe-supporting">
         <header class="recipe-header">
           <div class="recipe-kicker-row">
-            <span class="recipe-kicker">The Supporting Cast · Zero-Stress Accompaniments</span>
+            <span class="recipe-kicker">Supporting Cast &amp; Optional Soup</span>
           </div>
-          <h2 class="recipe-title">Mocktail, Snack Board, Cranberry Sauce &amp; Warm Rolls</h2>
-          <p class="recipe-byline">Simple, high-impact finishing touches timed to keep the kitchen calm</p>
+          <h2 class="recipe-title">Squash Soup, Mocktail, Snacks &amp; Sides</h2>
+          <p class="recipe-byline">Low-effort accompaniments timed around your main courses</p>
         </header>
+
+        <div class="recipe-controls">
+          <div class="recipe-control-item">
+            <span class="option-label">Freezer Squash Soup:</span>
+            <div class="choice-group" role="group" aria-label="Include Frozen Squash Soup">
+              <button class="choice-btn" type="button" data-soup="true" aria-pressed="${Boolean(state.cfg.includeSoup)}">Included (3:45 Starter)</button>
+              <button class="choice-btn" type="button" data-soup="false" aria-pressed="${!state.cfg.includeSoup}">Skip</button>
+            </div>
+          </div>
+        </div>
+
         <div class="supporting-grid">
-          ${DATA.supportingCast.map((item) => `
+          ${supporting.map((item) => `
             <div class="supporting-card">
-              <div class="dispatch-kicker">${escapeHtml(item.timing)}</div>
+              <div class="supporting-timing">${escapeHtml(item.timing)}</div>
               <h4>${escapeHtml(item.title)}</h4>
               <p>${item.copy}</p>
             </div>
@@ -636,7 +602,9 @@
     const container = document.getElementById('appliances-container');
     if (!container) return;
 
-    container.innerHTML = DATA.appliances.map((ap) => `
+    const appliances = DATA.getAppliances(state.cfg);
+
+    container.innerHTML = appliances.map((ap) => `
       <article class="appliance-card ${ap.standby ? 'standby' : ''}">
         <div class="appliance-card-header">
           <h3 class="appliance-name">${escapeHtml(ap.name)}</h3>
@@ -674,10 +642,11 @@
     const pantryEl = document.getElementById('pantry-container');
     if (!pantryEl) return;
 
+    const pantryGroups = DATA.getPantryChecklist(state.cfg);
     let totalItems = 0;
     let checkedItems = 0;
 
-    pantryEl.innerHTML = DATA.pantryChecklist.map((grp, gIdx) => `
+    pantryEl.innerHTML = pantryGroups.map((grp, gIdx) => `
       <div class="pantry-group">
         <h4>${escapeHtml(grp.group)}</h4>
         <ul class="ingredient-list">
@@ -701,14 +670,13 @@
     if (label) label.textContent = `${checkedItems} of ${totalItems} On Hand`;
   }
 
-  /* ==================== VIEW SWITCHING & NAVIGATION ==================== */
+  /* ==================== VIEW SWITCHING ==================== */
   function switchView(viewName, scrollTop = true) {
     state.view = viewName;
     saveState();
 
     document.querySelectorAll('.nav-tab').forEach((tab) => {
-      const selected = tab.dataset.view === viewName;
-      tab.setAttribute('aria-selected', String(selected));
+      tab.setAttribute('aria-selected', String(tab.dataset.view === viewName));
     });
 
     document.querySelectorAll('.view-panel').forEach((panel) => {
@@ -725,20 +693,16 @@
   }
 
   function jumpToNextStep() {
-    if (state.view !== 'timeline') {
-      switchView('timeline', false);
-    }
+    if (state.view !== 'timeline') switchView('timeline', false);
+
     const allSteps = DATA.getTimeline(state.cfg);
     const next = allSteps.find((s) => !state.doneSteps[s.id]);
     if (!next) {
-      showToast('Every step is complete — Happy Thanksgiving!');
+      showToast('All steps complete');
       return;
     }
 
-    // Ensure filters don't hide the next step
-    if (state.dayFilter !== 'all' && state.dayFilter !== next.day) {
-      state.dayFilter = 'all';
-    }
+    if (state.dayFilter !== 'all' && state.dayFilter !== next.day) state.dayFilter = 'all';
     if (state.cfg.crewMode === 'partner' && state.roleFilter !== 'all' && state.roleFilter !== next.role) {
       state.roleFilter = 'all';
     }
@@ -748,31 +712,37 @@
     const el = document.getElementById(`step-${next.id}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.style.outline = '2px solid var(--accent)';
-      el.style.outlineOffset = '4px';
+      el.style.outline = '1.5px solid var(--accent)';
+      el.style.outlineOffset = '6px';
       setTimeout(() => {
         el.style.outline = '';
         el.style.outlineOffset = '';
-      }, 1500);
+      }, 1400);
     }
   }
 
-  /* ==================== EVENT DELEGATION ==================== */
+  /* ==================== EVENTS ==================== */
   function bindEvents() {
-    // View Tabs
     document.querySelectorAll('.nav-tab').forEach((tab) => {
       tab.addEventListener('click', () => switchView(tab.dataset.view));
     });
 
-    // Wake Lock Buttons
     document.getElementById('btn-wake-mobile')?.addEventListener('click', toggleWakeLock);
     document.getElementById('btn-wake-desktop')?.addEventListener('click', toggleWakeLock);
 
-    // Jump to Next Step
     document.getElementById('btn-jump-next-mobile')?.addEventListener('click', jumpToNextStep);
     document.getElementById('btn-jump-next-desk')?.addEventListener('click', jumpToNextStep);
 
-    // Hide Done Toggle
+    // Collapsible mobile options drawer
+    document.getElementById('btn-mobile-options')?.addEventListener('click', () => {
+      const drawer = document.getElementById('mobile-options-drawer');
+      const btn = document.getElementById('btn-mobile-options');
+      if (!drawer || !btn) return;
+      drawer.hidden = !drawer.hidden;
+      btn.setAttribute('aria-expanded', String(!drawer.hidden));
+      syncControlButtons();
+    });
+
     document.getElementById('btn-toggle-hide-done')?.addEventListener('click', () => {
       state.hideDone = !state.hideDone;
       saveState();
@@ -780,7 +750,6 @@
       renderTimeline();
     });
 
-    // Print & Reset
     document.getElementById('btn-print')?.addEventListener('click', () => window.print());
     document.getElementById('btn-reset-progress')?.addEventListener('click', () => {
       if (!confirm('Reset all timeline, ingredient, and pantry checkmarks?')) return;
@@ -789,26 +758,34 @@
       state.checkedPantry = {};
       saveState();
       renderAll();
-      showToast('All checklists reset');
+      showToast('Checklists reset');
     });
 
-    // Global delegated clicks for dynamic elements
     document.addEventListener('click', (e) => {
       const target = e.target.closest('button, [data-toggle-ing], [data-toggle-pantry]');
       if (!target) return;
 
-      // Crew Mode Toggle
       if (target.dataset.crew) {
         state.cfg.crewMode = target.dataset.crew;
         if (state.cfg.crewMode === 'solo') state.roleFilter = 'all';
         saveState();
         syncControlButtons();
         renderTimeline();
-        showToast(state.cfg.crewMode === 'partner' ? 'Partner mode active — delegatable steps highlighted' : 'Solo Chef mode active');
+        showToast(state.cfg.crewMode === 'partner' ? 'Partner mode on' : 'Solo chef mode');
         return;
       }
 
-      // Day Filter
+      if (target.dataset.soup) {
+        const val = target.dataset.soup === 'true';
+        if (state.cfg.includeSoup !== val) {
+          state.cfg.includeSoup = val;
+          saveState();
+          renderAll();
+          showToast(val ? 'Squash soup added to plan' : 'Squash soup removed');
+        }
+        return;
+      }
+
       if (target.dataset.day) {
         state.dayFilter = target.dataset.day;
         saveState();
@@ -817,7 +794,6 @@
         return;
       }
 
-      // Role Filter
       if (target.dataset.role) {
         state.roleFilter = target.dataset.role;
         saveState();
@@ -826,22 +802,18 @@
         return;
       }
 
-      // Recipe / Desk Config Toggle
       if (target.dataset.cfgKey) {
         const key = target.dataset.cfgKey;
         const val = target.dataset.cfgVal;
         if (state.cfg[key] !== val) {
           state.cfg[key] = val;
           saveState();
-          syncControlButtons();
-          renderTimeline();
-          renderRecipes();
-          showToast('Updated timeline & recipes');
+          renderAll();
+          showToast('Updated plan & recipes');
         }
         return;
       }
 
-      // Toggle Timeline Step Checkbox
       if (target.dataset.toggleStep) {
         const id = target.dataset.toggleStep;
         state.doneSteps[id] = !state.doneSteps[id];
@@ -850,23 +822,11 @@
         return;
       }
 
-      // Start Step Timer
       if (target.dataset.startTimer) {
-        const mins = parseFloat(target.dataset.startTimer);
-        const label = target.dataset.timerLabel || 'Kitchen Timer';
-        startTimer(label, mins);
+        startTimer(target.dataset.timerLabel || 'Timer', parseFloat(target.dataset.startTimer));
         return;
       }
 
-      // Quick Sidebar Timers
-      if (target.dataset.quickTimer) {
-        const mins = parseFloat(target.dataset.quickTimer);
-        const label = target.dataset.quickLabel || `${mins}m Timer`;
-        startTimer(label, mins);
-        return;
-      }
-
-      // Timer Wire Controls
       if (target.dataset.timerPause) {
         togglePauseTimer(target.dataset.timerPause);
         return;
@@ -876,7 +836,6 @@
         return;
       }
 
-      // Open Recipe from Timeline
       if (target.dataset.openRecipe) {
         const dishId = target.dataset.openRecipe;
         switchView('recipes', false);
@@ -890,7 +849,6 @@
         return;
       }
 
-      // Recipe Jump Strip
       if (target.dataset.jump) {
         const jumpId = target.dataset.jump;
         document.querySelectorAll('.recipe-jump-btn').forEach((b) => {
@@ -901,7 +859,6 @@
         return;
       }
 
-      // Toggle Ingredient Check
       if (target.dataset.toggleIng) {
         const key = target.dataset.toggleIng;
         state.checkedIngredients[key] = !state.checkedIngredients[key];
@@ -911,7 +868,6 @@
         return;
       }
 
-      // Toggle Pantry Check
       if (target.dataset.togglePantry) {
         const key = target.dataset.togglePantry;
         state.checkedPantry[key] = !state.checkedPantry[key];
@@ -920,7 +876,6 @@
       }
     });
 
-    // Keyboard accessibility for checkbox <li> items
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const item = e.target.closest('[data-toggle-ing], [data-toggle-pantry]');
@@ -939,7 +894,6 @@
     switchView(state.view, false);
   }
 
-  /* ==================== INIT ==================== */
   document.addEventListener('DOMContentLoaded', () => {
     bindEvents();
     renderAll();
